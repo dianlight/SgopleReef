@@ -15,8 +15,10 @@ void IRAM_ATTR pulseCounter()
 }
 
 // PT100
-#include <driver/adc.h>
-#include "esp_adc_cal.h"
+#ifdef ESP32
+  #include <driver/adc.h>
+  #include "esp_adc_cal.h"
+#endif
 // Gain = VREF/2^12 (Il sensore ADC ESP32 è ha 12bit)
 #define DEFAULT_VREF    1128.0      //Use spefuse.py --port /dev/cu.SLAB_USBtoUART adc_info 
 #define NO_OF_SAMPLES   128         //Multisampling
@@ -26,7 +28,7 @@ void IRAM_ATTR pulseCounter()
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);    
+ // while (!Serial);    
   Wire.begin(SDA,SCL);
   delay(1000);
   // I2C Scan
@@ -74,23 +76,29 @@ void setup() {
   pinMode(BUTTON3, INPUT_PULLUP);
 
   // Fluxometer
-  pinMode(FLUX, INPUT_PULLUP);
+  pinMode(FLUX, INPUT);
   pulseCount = 0;
-  attachInterrupt(digitalPinToInterrupt(FLUX), pulseCounter, FALLING);
+  attachInterrupt(digitalPinToInterrupt(FLUX), pulseCounter, CHANGE); // FALLING
 
   // Pump
   pinMode(PUMP, OUTPUT);
 
   // Level
-  pinMode(LEVEL, INPUT_PULLDOWN);
+  #ifdef ESP32
+    pinMode(LEVEL, INPUT_PULLDOWN);
+  #elif ESP8266
+    pinMode(LEVEL, INPUT_PULLDOWN_16);
+  #endif
 
   // PT100
-  esp_err_t status = adc2_vref_to_gpio(VREF);
-  if (status == ESP_OK) {
-        Serial.printf("v_ref routed to GPIO %d\n",analogRead(VREF));
-  } else {
-        Serial.printf("failed to route v_ref\n");
-  }
+  #ifdef ESP32
+    esp_err_t status = adc2_vref_to_gpio(VREF);
+    if (status == ESP_OK) {
+          Serial.printf("v_ref routed to GPIO %d\n",analogRead(VREF));
+    } else {
+          Serial.printf("failed to route v_ref\n");
+    }
+  #endif
 
   // Peltier
   pinMode(PELTIER,OUTPUT);
@@ -110,12 +118,14 @@ void loop() {
     last1s = millis();
     // Display
     u8g2.clearBuffer();					// clear the internal memory
-    u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font
-    u8g2.drawStr(0,10,"Hello World!");	// write something to the internal memory
-    u8g2.sendBuffer();					// transfer internal memory to the display
+ //   u8g2.setFont(u8g2_font_ncenB08_tr);	// choose a suitable font/
+    u8g2.setFont(u8g2_font_5x8_tf);	// choose a suitable font/
+ //   u8g2.drawStr(0,10,"Hello World!");	// write something to the internal memory
+ //   u8g2.sendBuffer();					// transfer internal memory to the display
 
     // Buttons
-    Serial.printf("Buttons: %s %s %s ",
+    u8g2.setCursor(0,8);
+    u8g2.printf("Buttons: %s %s %s ",
       digitalRead(BUTTON1) == LOW?"1":"0",
       digitalRead(BUTTON2) == LOW?"1":"0",
       digitalRead(BUTTON3) == LOW?"1":"0"
@@ -130,27 +140,32 @@ void loop() {
       totalMilliLitres += (1000.0 / calibrationFactor )  * pulse1Sec;
       float flowRate = (1000.0 / calibrationFactor ) * (pulse1Sec / ((currentMillis - previousMillis)/1000.0)) ;
       previousMillis = millis();
-      Serial.printf("Flux:%f ml/s %ld ml ", flowRate,totalMilliLitres);
+      u8g2.setCursor(0,8*2);
+      u8g2.printf("Flux:%.2f ml/s %ld ml ", flowRate,totalMilliLitres);
     }
 
     // PUMP
-    if(digitalRead(BUTTON1) == LOW){
-      digitalWrite(PUMP,HIGH);
-    } else {
+    if(digitalRead(BUTTON3) == LOW){
       digitalWrite(PUMP,LOW);
+    } else {
+      digitalWrite(PUMP,HIGH);
     }
 
     // LEVEL
-    Serial.printf("Level:%s ",digitalRead(LEVEL) == HIGH?"LOW":"OK");
+    u8g2.setCursor(0,8*3);
+    u8g2.printf("Level:%s ",digitalRead(LEVEL) == HIGH?"LOW":"OK");
 
     // PT100
-    static float lastTemp = 0;
+    static float lastTemp = 0, delta = 0;
     if(sample > NO_OF_SAMPLES){
-      Serial.printf("Temp:%.1f °C D:%.2f °C",temp,abs(lastTemp-temp));
+      delta = abs(lastTemp-temp);
       sample=0;
       lastTemp = temp;
       temp = analogRead(THERM3)*GAIN;
     }
+    u8g2.setCursor(0,8*4);
+    u8g2.enableUTF8Print();
+    u8g2.printf("Temp:%.1f °C D:%.2f °C",temp,delta);
 
     // PELTIER
     if(digitalRead(BUTTON2) == LOW){
@@ -160,7 +175,7 @@ void loop() {
     }
 
 
-    Serial.println();
+   // Serial.println();
   }
 
   // PT100
@@ -168,6 +183,8 @@ void loop() {
   sample++;
   temp = (temp + (newread*GAIN)) / 2;
   
+  // Display
+  u8g2.sendBuffer();					// transfer internal memory to the display
 
   delay(10);    
 }
