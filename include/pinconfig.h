@@ -11,8 +11,8 @@
 
 #ifdef ESP32
     // Buttons
-    #define BUTTON1     19
-    #define BUTTON2     18
+    #define BUTTON1     18
+    #define BUTTON2     19
     #define BUTTON3     5
 
     // Flussometro
@@ -22,14 +22,14 @@
     #define  PUMP       15
 
     // Level Sensor
-    #define LEVEL      27
+    #define LEVEL       27
 
 
     //PT100
-    #define THERM1      35
-    #define THERM2      32
-    #define THERM3      33
-    #define VREF        GPIO_NUM_25
+    #define THERM1      A6 // 34
+    #define THERM2      A7 // 35
+    #define THERM3      A4 // 33
+    #define VREF        GPIO_NUM_25 // Valid are 25/26/27
 
     // Relay Peltier
     #define PELTIER     12
