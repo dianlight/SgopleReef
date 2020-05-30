@@ -37,9 +37,9 @@ install:
 script:
     - platformio run
 deploy:
-  provider: releases
+  provider: releasesgit
   overwrite: true
-  api_key: $GITHUB_OAUTH_TOKEN
+  edge: true
   file:
    - .pio/build/esp32dev/firmware.bin
    - .pio/build/esp32dev/firmware.elf
