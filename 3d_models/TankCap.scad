@@ -1,21 +1,40 @@
 // SgopleReef 
 // Based on https://hackaday.io/project/57044-3d-printable-fuel-cap-for-brush-cutter
 
-use <FuelCap.scad>
-use<threads.scad>;
+//use <FuelCap.scad>
+//use<threads.scad>;
+use <threadlib/threadlib.scad>
 use <Hose_Adaptor.scad>
+use <NopSCADlib/utils/rounded_cylinder.scad>
+use <NopSCADlib/utils/rounded_polygon.scad>
 
 //parameters mm
 
+MY_THREAD_TABLE = [
+["M14x1.25-ext", [1.25, 6.1290, 12.4385, [[0, -0.5541], [0, 0.5541], [0.8035, 0.0902], [0.8035, -0.0902]]]],
+["M14x1.25-int", [1.25, -7.1669, 14.1750, [[0, 0.6188], [0, -0.6188], [0.7772+0.35, -0.1700], [0.7772+0.35, 0.1700]]]],
+                   ];
 
 // Printables parts:
-// TankCap Hose FlowCap
+// TankPipe TankCap Hose FlowCap
 print = "TankCap";
 
 
 // Parameters
-flowScrew   = [13.6,1.5];
-wallTickness= 2;
+capThread        = "M48x4";
+capThreadTurns   = 3;
+wallTickness     = 2;
+capSpc           = thread_specs(str(capThread,"-int"));
+icapSpc          = thread_specs(str(capThread,"-ext"));
+threadDiamater   = capSpc[2]+wallTickness*2;
+ithreadDiamater  = icapSpc[2];
+flowThread       = "M14x1.25"; // M14
+flowThreadTurns  = 5;
+flowSpc          = thread_specs(str(flowThread,"-int"));
+gripTickness     = 5;
+tankBorder       = 12;
+tankBorderLen    = 90;
+tankBorderTick   = 5;
 
 module hose(){   
     difference(){
@@ -42,71 +61,76 @@ module hose(){
                 // Middle Length
                 mid_length = 0 
             );
-            cylinder(r=-wallTickness/1.5+flowScrew[0]/2,h=wallTickness/2);
+            cylinder(r=-wallTickness/1.5+flowSpc[2]/2,h=wallTickness/2);
         }
         cylinder(r=2.8,h=15);
     }
 }
 
-module tankCap(){
-    union(){
-        inSmallCylHgt=5.9;
-        difference(){
-        innerHeight=15;
-        outerHeight=20;
-        smallCylHgt=5.9;
-        smallCylRadius=17.9/2;    
-          buildCap(
-            innerHeight=15,
-            outerHeight=20,
-            smallCylHgt=5.9,
-            smallCylRadius=17.9/2,
-            inSmallCylHgt=5.9,
-            inSmallCylRadius=15.14/2,
-            metricThreadDiameter = 38,
-            metricThreadPitch    = 4
-          );
-          translate([0,0,(outerHeight-innerHeight)]){cylinder(r=33/2, h=25);}
-          cylinder(r=4.5,h=inSmallCylHgt*2);
-          translate([10,10,0]) cylinder(r=4.5,h=inSmallCylHgt*2);
+
+module tankPipe(){
+    difference(){
+        union(){
+            bolt(capThread,turns=capThreadTurns,higbee_arc=30);
+            profile = [
+                [-tankBorderLen/2,0,0],
+                [0,1,threadDiamater/2],
+                [tankBorderLen/2,0,0],
+                [0,-1,threadDiamater/2]
+            ];
+            tangents = rounded_polygon_tangents(profile);
+            length = rounded_polygon_length(profile, tangents);
+            for(zindex=[1:1:tankBorderTick]){
+                translate([0,0,-zindex*(tankBorder/tankBorderTick)-wallTickness]) 
+                 linear_extrude(tankBorder/tankBorderTick)
+                  scale([1,zindex % 2 == 1?1:0.95,1]) rounded_polygon(profile, tangents);
+            }
         }
-        //small inner cylinder for air vent
-        difference(){
-              cylinder(r=wallTickness+flowScrew[0]/2,h=13,$fn=40);
-              translate([0,0,2]){
-                  cylinder(r=11.3/2, h=11);
-                  metric_thread(flowScrew[0], flowScrew[1], inSmallCylHgt*2, internal=true);
-              }
-        }
+        cylinder(h=(capThreadTurns*capSpc[0]+wallTickness*2)*2,r=ithreadDiamater/2-wallTickness/2,center=true,$fn=160);
     }
 }
 
+
+module tankCap(){
+    difference(){
+     union(){   
+        nut(capThread, turns=capThreadTurns, Douter=threadDiamater+gripTickness);
+        translate([0,0,capThreadTurns*capSpc[0]+wallTickness]) 
+                rounded_cylinder(h=wallTickness,r2=wallTickness,r=threadDiamater/2+gripTickness/2,$fn=180);
+        translate([0,0,wallTickness+capThreadTurns*capSpc[0]-flowThreadTurns*flowSpc[0]]) nut(flowThread,turns=flowThreadTurns,Douter=flowSpc[2]+wallTickness*2,,table=MY_THREAD_TABLE);
+     }
+     cylinder(r=4.5,h=capThreadTurns*capSpc[0]+wallTickness*2,$fn=40);
+     translate([threadDiamater/3,-7.2-wallTickness/2,0]) 
+        rotate([0,0,90])
+         cube([14.4+wallTickness,5.5+wallTickness,capThreadTurns*capSpc[0]+wallTickness*2]);
+     for (rands=[0:45:360]){
+         rotate([0,0,rands]) 
+             translate([threadDiamater/2+gripTickness*2+wallTickness/2,0,0]) 
+             cylinder(h=(capThreadTurns+1)*capSpc[0]+wallTickness,r=gripTickness*2.3,$fn=60);
+     }
+    }
+    
+}
+
+
 module flowCap(){
-    union(){
-        difference(){
-          innerHeight=9;
-          outerHeight=11;
-          inSmallCylRadius=15.14/2;
-          inSmallCylHgt=5.9;  
-  
-          cylinder(r=wallTickness+flowScrew[0]/2,h=13,$fn=6);  
-          translate([0,0,2]){
-              cylinder(r=11.3/2, h=11);
-              metric_thread(flowScrew[0], flowScrew[1], inSmallCylHgt*2, internal=true);
-          }
-          cylinder(r=4.5,h=inSmallCylHgt*2,$fn=60);
+    intersection(){
+        union(){
+            nut(flowThread,turns=flowThreadTurns*2,Douter=flowSpc[2]+wallTickness*2,table=MY_THREAD_TABLE);
+            difference() {
+              cylinder(r=flowSpc[2],h=wallTickness,$fn=60);  
+              cylinder(r=4.5,h=wallTickness,$fn=60);
+            }
         }
-        //small inner cylinder for air vent
-//        difference(){
-//          translate([0,0,outerHeight-innerHeight]){cylinder(h=smallCylHgt, r=smallCylRadius, $fn=40);}
-//          metric_thread(12.3, 1.5, inSmallCylHgt*2, internal=true);
-//        }
+        cylinder(r=wallTickness+flowSpc[2]/2,h=23,$fn=6);  
     }
 }
 
 
 if( print == "TankCap"){
     tankCap();
+} else if (print == "TankPipe"){
+    tankPipe();
 } else if (print == "FlowCap"){
     flowCap();
 } else if (print == "Hose"){

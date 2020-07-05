@@ -130,8 +130,14 @@ module _button_layout(){
 module buttons(){
     translate([-7,29,47]) rotate([90,0,90]){
         _button_layout(){
-            rotate([0,0,90]) cylinder(r=2.3,h=12+boxTikness*3,$fn=6);
-            translate([0,0,boxTikness*3]) cylinder(r=4,h=boxTikness,$fn=30);
+            difference(){
+                union(){
+                    rotate([0,0,90]) cylinder(r=2.3,h=14.8+boxTikness,$fn=6);
+                    translate([0,0,boxTikness*3]) cylinder(r=4,h=boxTikness,$fn=30);
+                    translate([0,0,boxTikness*3]) cylinder(r=(4.3+boxTikness)/2,h=(14.8+boxTikness)-boxTikness*3,$fn=30);
+                }
+                translate([0,0,14.8]) cylinder(r=4.3/2,h=boxTikness,$fn=30);
+            }
         }
     }
 }

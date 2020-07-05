@@ -1,14 +1,17 @@
-#include "ota.h"
-//#include <ESP8266WiFi.h>
+#include "OTA.h"
+#include "EvoDebug.h"
+#include <WiFi.h>
 #include <ESPmDNS.h>
 #include <functional>
-//#include "Config.h"
+#include "Config.h"
 //#include "Display.h"
 
 
+
+
 OTA::OTA() {
-  // OTA
-  Serial.print("OTA Subsystem start!");
+    // OTA
+  debugD("OTA Subsystem start!");
 
   // Port defaults to 8266
   ArduinoOTA.setPort(3232);
@@ -25,52 +28,54 @@ OTA::OTA() {
   ArduinoOTA.onProgress(std::bind(&OTA::onProgress,this,std::placeholders::_1,std::placeholders::_2));
   ArduinoOTA.onError(std::bind(&OTA::onError, this, std::placeholders::_1));
 
-  ArduinoOTA.setHostname("SgopleReef");
+  ArduinoOTA.setHostname(_SMT_HOST);
   
+
 }
 
 void OTA::onStart(){
-  processCallbacks(START);
 
   if (ArduinoOTA.getCommand() == U_FLASH) {
     type = "sketch";
   } else { // U_FS
     type = "filesystem";
   }
-
-  Serial.printf("Start updating %s",type.c_str());
+  processCallbacks(START,type);
+  // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+  debugI("Start updating %s",type.c_str());
 }
 
 void OTA::onEnd(){
   processCallbacks(STOP);
-  Serial.printf("\nEnd");
+  debugI("\nEnd");
 }
 
 void OTA::onProgress(unsigned int progress, unsigned int total){
-  Serial.printf("%d/%d",progress,total);
-  processCallbacks(PROGRESS,progress,total);
+  u8_t perc = progress / (total / 100);
+  processCallbacks(PROGRESS,perc);
+  if(progress % 10 == 0)debugI("%d/%d",progress,total);
 }
 
 void OTA::onError(ota_error_t error){
-  
-  Serial.printf("Error[%u]: ", error);
+  processCallbacks(ERROR);
+  debugE("Error[%u]: ", error);
   if (error == OTA_AUTH_ERROR) {
-    Serial.printf("Auth Failed");
+    debugE("Auth Failed");
     processCallbacks(ERROR,"Auth Failed");
   } else if (error == OTA_BEGIN_ERROR) {
-    Serial.printf("Begin Failed");
+    debugE("Begin Failed");
     processCallbacks(ERROR,"Begin Failed");
   } else if (error == OTA_CONNECT_ERROR) {
-    Serial.printf("Connect Failed");
+    debugE("Connect Failed");
     processCallbacks(ERROR,"Connect Failed");
   } else if (error == OTA_RECEIVE_ERROR) {
-    Serial.printf("Receive Failed");
-    processCallbacks(ERROR,"Receive Failed");
+    debugE("Receive Failed");
+    processCallbacks(ERROR,"End Failed");
   } else if (error == OTA_END_ERROR) {
-    Serial.printf("End Failed");
+    debugE("End Failed");
     processCallbacks(ERROR,"End Failed");
   } else {
-    processCallbacks(ERROR,"Unknown");  
+      processCallbacks(ERROR,"Unknown");  
   }
 }
 
@@ -94,13 +99,12 @@ void OTA::processCallbacks(OTA_EVENT event,...){
 bool OTA::start(){
   MDNS.end();
   MDNS.begin(ArduinoOTA.getHostname().c_str());
-  MDNS.enableArduino(3232); // 8266  
+  MDNS.enableArduino(3232);  
   ArduinoOTA.begin();
-//  checkOTATicker.attach_ms(150,+[](){ 
-//    if (WiFi.status() == WL_CONNECTED){
-//        ArduinoOTA.handle();
-//    }
-//  });
+
+//  checkOTATicker.attach_ms_scheduled(150,std::bind(&OTA::loopOTA,this));
+  checkOTATicker.attach_ms(150, +[](OTA* instance) { instance->loopOTA(); }, this);
+
   _running = true;
   return _running;
 }

@@ -2,20 +2,9 @@
 #include <Ticker.h>
 #include <list> 
 #include <ArduinoOTA.h>
+#include "EvoStartableInterface.h"
 
-class EvoStartable {
-    public:
-        virtual ~EvoStartable() {}
-        virtual bool start() = 0;
-        bool isRunning(){ return _running;};
-        bool _running = false;
-};
 
-class EvoStopable: public EvoStartable {
-    public:
-        virtual ~EvoStopable() {}
-        virtual bool stop() = 0;
-};
 
 class OTA: public EvoStopable {
     public:
@@ -33,7 +22,6 @@ class OTA: public EvoStopable {
 
         bool start();
         bool stop();
-        void loopOTA();
     
     private:
         Ticker checkOTATicker;
@@ -42,6 +30,7 @@ class OTA: public EvoStopable {
 
         String type;
 
+        void loopOTA();
         void onStart();
         void onEnd();
         void onProgress(unsigned int progress, unsigned int total);

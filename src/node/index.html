@@ -1,0 +1,278 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ titleize(process.env.npm_package_name) }}</title>
+</head>
+
+<body>
+    <header class="sticky">
+        <a id="homeTab" href="#" class="logo" onclick="show('home')"><span class="icon-home"></span><span class="hidden-sm">{{ titleize(argv.env.DEFINE_SMT_HOST) }}</span></a>
+        <a id="configTab" href="#" class="button" onclick="show('config')"><span class="icon-edit"></span><span class="hidden-sm">Config</span></a>
+        <a id="wifiConfigTab" href="#" class="button" onclick="show('wificonfig')"><span class="icon-share"></span><span class="hidden-sm">Wifi Config</span></a>
+        <!-- #ifdef DEBUG_REMOTE -->
+        <a id="debugTab" href="#" class="button" onclick="show('debug')"><span class="icon-info"></span><span class="hidden-sm">Debug</span></a>
+        <!-- #endif -->
+    </header>
+
+    <div id="home" class="panel container">
+        <div class="row">
+            <div class="col-sm-12 col-md-4 col-lg-3">
+                <div class="card fluid">
+                    <canvas id="screen" height="32" width="128" class="mirror"></canvas>
+                </div>
+            </div>
+            <div class="col-sm col-md-4 col-lg-3">
+                <div class="card fluid">
+                    <div class="section dark">
+                        Controls
+                    </div>
+                    <div class="section">
+                        <div class="button-group">
+                            <button id="mode-auto" onclick="cmd(this)" data-onclass="primary" value="Auto"><span class="flaticon flaticon-mode"></span></button>
+                            <button id="mode-manual" onclick="cmd(this)" data-onclass="primary" value="Manual"><span class="flaticon flaticon-assembly"></span></button>
+                            <!--button id="mode-off" onclick="cmd(this)" data-onclass="primary" value="Off"><span class="flaticon flaticon-off"></span></button-->
+                        </div>
+                        <!--
+                        <div class="button-group">
+                            <button id="hold-eco" onclick="cmd(this)" data-onclass="tertiary" value="Eco"><span class="flaticon flaticon-leaf"></button>
+                            <button id="hold-normal" onclick="cmd(this)" data-onclass="primary" value="Normal"><span class="flaticon flaticon-normal"></button>
+                            <button id="hold-confort" onclick="cmd(this)" data-onclass="secondary" value="Confort"><span class="flaticon flaticon-slipper"></button>
+                        </div>
+                        <div class="button-group">
+                            <button id="away-on" onclick="cmd(this)" data-onclass="primary" value="true"><span class="flaticon flaticon-bag"></button>
+                            <button id="away-off" onclick="cmd(this)" data-onclass="primary" value="false"><span class="flaticon flaticon-home"></span></button>
+                        </div>
+                        -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wificonfig" class="panel">
+        <form id="wifiConfigForm">
+            <fieldset name="WiFi">
+                <legend>WiFi</legend>
+                <div id="wifiScanSpinner" class="row" style="display: none;">
+                    <div class="spinner"></div>
+                </div>
+                <div id="wifiScanResult" class="row cols-sm-12" style="display: none;">
+                    <table class="striped hoverable">
+                        <thead>
+                            <tr class="hidden-sm">
+                                <th>SSID</th>
+                                <th>Stength</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wifiScanTable">
+                            <tr>
+                                <td data-label="SSID">LTOfficeNet</td>
+                                <td data-Label="Strength">50%</td>
+                                <td data-label="Type"><span class="icon-lock"></span></td>
+                            </tr>
+                            <tr>
+                                <td data-label="SSID">LTOfficeNet</td>
+                                <td data-Label="Strength">50%</td>
+                                <td data-label="Type"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label class="hidden-sm" for="ssid">SSID</label>
+                        <input type="text" id="ssid" name="ssid" placeholder="SSID" onchange="validateWifi()" /><a id="wifiScanButton" href="#" class="button tertiary small"><span onclick="scanWifi()" class="icon-search"></span></a>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label class="hidden-sm" for="wkey">Password</label>
+                        <input type="password" id="wkey" name="wkey" placeholder="Password" onchange="validateWifi()" oninput="validateWifi()" />
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <div id="config" class="panel">
+        <form id="configForm">
+            <!--
+            <fieldset name="Targets">
+                <legend>Targets</legend>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="teco">Eco Temperature</label>
+                        <input type="text" id="teco" name="teco" placeholder="" />&#x2103;
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tnorm">Normal Temperature</label>
+                        <input type="text" id="tnorm" name="tnorm" placeholder="" />&#x2103;
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tconf">Confort Temperature</label>
+                        <input type="text" id="tconf" name="tconf" placeholder="" />&#x2103;
+                    </div>
+                </div>
+            </fieldset>
+            -->
+            <fieldset name="Automation">
+                <legend>Automation</legend>
+                <!--
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="aautotimeout">Manual to Auto return time</label>
+                        <input type="text" id="aautotimeout" name="aautotimeout" placeholder="" /> sec (0 = newer return)
+                    </div>
+                </div>
+                -->
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="dsleep">Display Low Energy</label>
+                        <input type="text" id="dsleep" name="dsleep" placeholder="" /> sec
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="doff">Display Off</label>
+                        <input type="text" id="doff" name="doff" placeholder="" /> sec
+                    </div>
+                </div>
+            </fieldset>
+            <!--
+            <fieldset name="Away">
+                <legend>Away</legend>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tadelta">Away &#x394;</label>
+                        <input type="text" id="tadelta" name="tadelta" placeholder="" />&#x2103;
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tamode">Away Mode</label>
+                        <select id="tamode" name="tamode">
+                            <option value="3">As Auto</option>
+                            <option value="0">Fix to Eco</option>
+                            <option value="1">Fix to Normal</option>
+                            <option value="2">Fix to Confort</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+            -->
+            <fieldset name="Calibration">
+                <legend>Calibration</legend>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tzero">T0 at 0&deg;C</label>
+                        <input type="text" id="tzero" name="tzero" placeholder="" />mV
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tonet">T1 temp </label>
+                        <input type="text" id="tonet" name="tonet" placeholder="" />&deg;C
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tone">T1 ad reference temp</label>
+                        <input type="text" id="tone" name="tone" placeholder="" />mV
+                    </div>
+                </div>
+            </fieldset>
+            <!--
+            <fieldset name="MQTT">
+                <legend>MQTT</legend>
+                <div class="row">
+                    <div class="col-sm-12 col-md-6">
+                        <label for="nname">Node name</label>
+                        <input type="text" id="nname" name="nname" placeholder="" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="saddress">Server Address</label>
+                        <input type="text" id="saddress" name="saddress" placeholder="" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="port">Port</label>
+                        <input type="text" id="port" name="port" placeholder="" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="user">User</label>
+                        <input type="text" id="user" name="user" placeholder="" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="" />
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <label for="tprefix">Topic prefix</label>
+                        <input type="text" id="tprefix" name="tprefix" placeholder="" />
+                    </div>
+                </div>
+            </fieldset>
+            -->
+        </form>
+    </div>
+
+    <!-- #ifdef DEBUG_REMOTE -->
+    <div id="debug" class="panel" style="padding-left: 15px;">
+        <div class="row col-sm-12 debug">
+            <textarea id="debug-view" class="debug" placeholder="debug" readonly></textarea>
+        </div>
+        <div class="row col-sm-12">
+            <label for="sf1-check" class="doc">Autoscroll</label>
+            <input type="checkbox" autocomplete="off" id="autoscroll" class="doc"></input>
+        </div>
+    </div>
+    <!-- #endif -->
+
+    <footer class="sticky">
+        <div class="row">
+            <div class="col-sm-12 col-md-10 col-sm-last hidden-sm">
+                <p>Version: {{ argv.env.DEFINE_SMT_VERSION }}
+                    <!-- {{ argv }} -->
+                    -{{ process.env.npm_package_version }}
+                    <!--            -->
+                    ({{ process.env.npm_package_gitHead }}) &#xA9; {{ process.env.npm_package_author_name }}
+                    <!--           -->
+                    // {{ process.env.npm_package_license }}</p>
+            </div>
+            <div class="col-sm-12 col-md-2 col-md-last">
+                <div id="saveButtons" class="button-group">
+                    <button class="primary" onclick='save()'>Save</button>
+                    <button class="secondary" onclick="reload()">Cancel</button>
+                </div>
+                <div id="connectButtons" class="button-group">
+                    <!-- <button id="wifiConnectButton" class="primary" onclick="connect()" disabled>Connect</button> -->
+                    <label for="modal-control-connect" onclick="connect()" class="button primary">Connect</label>
+                    <input type="checkbox" id="modal-control-connect" class="modal">
+                    <div>
+                        <div class="card">
+                            <!-- <label for="modal-control" class="modal-close" ></label> -->
+                            <h3 class="section">Wifi</h3>
+                            <p class="section">Connecting to WiFi..</p>
+                            <div class="spinner primary"></div>
+                        </div>
+                    </div>
+                    <!--
+                    <label for="modal-control-wps" onclick="wps()" class="button tertiary">WPS</label>
+                    <input type="checkbox" id="modal-control-wps" class="modal">
+                    <div>
+                        <div class="card">
+                            <h3 class="section">WPS</h3>
+                            <p class="section">Press WPS button on your router..</p>
+                            <div class="spinner tertiary"></div>
+                        </div>
+                    </div>
+                    -->
+                </div>
+            </div>
+        </div>
+        <div class="row col-sm-12 hidden-sm">
+            <p>
+                Some Icons made by <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
+            </p>
+        </div>
+    </footer>
+</body>
+
+</html>

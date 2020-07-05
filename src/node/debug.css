@@ -1,0 +1,13 @@
+.debug {
+    height: 90%;
+    width: 99%;
+}
+
+.debug textarea {
+    background-color: black;
+    overflow: auto;
+    color: white;
+    height: 100%;
+    width: 100%;
+    white-space: pre;
+}

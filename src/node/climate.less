@@ -1,0 +1,106 @@
+@pulse-color: #73eaff;
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0px @pulse-color
+    }
+    50% {
+        box-shadow: 0 0 20px @pulse-color
+    }
+    100% {
+        box-shadow: 0 0 0px @pulse-color
+    }
+}
+
+.room-name {
+//    font-size: 25px;
+    text-align: center;
+    color: lightgrey;
+    padding: 10px;
+}
+
+.temperature-container {
+//    padding: 20px;
+}
+
+.temperature-indicator {
+    width: 200px;
+    height: 200px;
+    background-color: transparent;
+    border-radius: 50%;
+    margin: 0 auto;
+    line-height: 200px;
+    text-align: center;
+    font-size: 65px;
+//    color: #2a2a35;
+//    font-weight: bold;
+    animation: pulse 3s ease-in-out 2s infinite;
+}
+
+.temp-pick {
+    margin-top: -70px;
+    width: 100%;
+    text-align: center;
+}
+
+.temp-pick div {
+    font-size: 25px;
+    font-weight: 100;
+    display: inline;
+    padding: 10px;
+}
+
+.fah {
+    color: lightgrey;
+}
+
+.button-container {
+    width: 100%;
+    text-align: center;
+    padding-top: 20px;
+}
+
+.button-container .decrease,
+.increase {
+    width: 80px;
+    height: 80px;
+    margin: 20px 10px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 40px;
+    line-height: 80px;
+    font-weight: 100;
+}
+
+.decrease {
+    color: #2a2a35;
+    transition: box-shadow ease-in-out;
+}
+
+.decrease:hover {
+    -webkit-box-shadow: 0px 0px 2px 0px rgba(255, 117, 124, 1);
+    -moz-box-shadow: 0px 0px 2px 0px rgba(255, 117, 124, 1);
+    box-shadow: 0px 0px 2px 0px rgba(255, 117, 124, 1);
+}
+
+.increase {
+    color: #2a2a35;
+    transition: box-shadow ease-in-out;
+}
+
+.increase:hover {
+    -webkit-box-shadow: 0px 0px 2px 0px @pulse-color;
+    -moz-box-shadow: 0px 0px 2px 0 @pulse-color;
+    box-shadow: 0 0 2px 0 @pulse-color;
+}
+
+.auto-mode {
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.fa-thermometer-quarter {
+    font-size: 30px;
+}

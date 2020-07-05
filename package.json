@@ -1,0 +1,61 @@
+{
+    "name": "SgopleReef",
+    "version": "0.1.0",
+    "description": "HtmlData for ${npm_package_name}",
+    "main": "src/node/index.js",
+    "directories": {
+        "lib": "lib",
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start:dev": "webpack-dev-server --mode=development --env.DEFINE_SMT_VERSION=${npm_package_version} --env.DEFINE_SMT_HOST=${npm_package_name} --env.DEFINE_DEBUG_REMOTE=False",
+        "compile": "webpack --mode=production --env.DEFINE_SMT_VERSION=${DEFINE_SMT_VERSION:-${npm_package_version}} --env.DEFINE_SMT_HOST=${DEFINE_SMT_HOST:-'SgopleReef' } --env.DEFINE_DEBUG_REMOTE=${DEFINE_DEBUG_REMOTE:-'True'}",
+        "postinstall": "npm run compile",
+        "profile": "webpack --profile --json > webpack-stats.json && webpack-bundle-analyzer webpack-stats.json",
+        "clean": "rimraf data",
+        "cleanall": "rimraf data node_modules"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dianlight/${npm_package_name}.git"
+    },
+    "author": "Lucio Tarantino",
+    "license": "GPL-3.0-or-later",
+    "bugs": {
+        "url": "https://github.com/dianlight/${npm_package_name}/issues"
+    },
+    "homepage": "https://github.com/dianlight/${npm_package_name}#readme",
+    "devDependencies": {
+        "compression-webpack-plugin": "^3.1.0",
+        "css-loader": "^3.4.2",
+        "extract-loader": "^3.1.0",
+        "file-loader": "^5.0.2",
+        "html-loader": "^0.5.5",
+        "html-replace-webpack-plugin": "^2.5.6",
+        "html-webpack-plugin": "^3.2.0",
+        "less": "^3.11.1",
+        "less-loader": "^5.0.0",
+        "macro-preprocessor-loader": "0.0.3",
+        "mini-css-extract-plugin": "^0.9.0",
+        "node-sass": "^4.13.1",
+        "rimraf": "^3.0.0",
+        "sass-loader": "^8.0.2",
+        "source-map-loader": "^0.2.4",
+        "style-loader": "^1.1.3",
+        "titleize": "^2.1.0",
+        "webfonts-loader": "^5.1.1",
+        "webpack": "^4.41.5",
+        "webpack-bundle-analyzer": "^3.6.0",
+        "webpack-cli": "^3.3.10",
+        "webpack-dev-server": "^3.10.1",
+        "ws": "^7.2.1"
+    },
+    "dependencies": {
+        "cash-dom": "^6.0.2",
+        "mini.css": "^3.0.1",
+        "path-svg": "^0.2.1",
+        "populate.js": "^1.1.0",
+        "reconnecting-websocket": "^4.4.0"
+    }
+}
