@@ -33,13 +33,7 @@ DNSServer dns;
 //U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, /* reset=*/U8X8_PIN_NONE, /* clock=*/SCL, /* data=*/SDA); // pin remapping with ESP8266 HW I2C
 //// U8G2_SSD1306_128X32_UNIVISION_F_SW_I2C u8g2(U8G2_R0,  /* clock=*/SCL, /* data=*/SDA, /* reset=*/U8X8_PIN_NONE); // pin remapping with ESP8266 HW I2C
 
-// PT100
-#include <driver/adc.h>
-#include "esp_adc_cal.h"
-// Gain = VREF/2^12 (Il sensore ADC ESP32 è ha 12bit)
-#define DEFAULT_VREF 3300.0 //TL431
-#define NO_OF_SAMPLES 128   //Multisampling
-#define GAIN DEFAULT_VREF / 4095.0
+
 
 
 void setup()
@@ -88,9 +82,13 @@ void setup()
   },WiFiEvent_t::SYSTEM_EVENT_STA_GOT_IP);
 
   WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info){
+    evoWebserver.start();
+  },WiFiEvent_t::SYSTEM_EVENT_AP_START);
+
+  WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info){
     debugI("Wifi Event Disconnect %d",event);
-    ota.stop();
-    evoWebserver.stop();
+  //  ota.stop();
+  //  evoWebserver.stop();
   },WiFiEvent_t::SYSTEM_EVENT_STA_DISCONNECTED);
 
   waterLevel.start();

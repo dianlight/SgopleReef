@@ -17,7 +17,7 @@ bool EvoWifi::doSTAConnect(){
     WiFi.mode(WIFI_STA);
     WiFi.setAutoConnect(true);
     WiFi.setAutoReconnect(true);
-    WiFi.begin();
+    WiFi.begin("Casa","&&MartyEli767");
     delay(500);
     int8_t status = WiFi.waitForConnectResult();
     if(status != WL_CONNECTED){

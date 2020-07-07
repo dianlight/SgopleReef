@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "WaterLevel.h"
 #include "HID.h"
+#include "AID.h"
 
 //#define fontName u8g2_font_profont10_tf
 #define fontName u8g2_font_haxrcorp4089_tr
@@ -66,7 +67,7 @@ bool Display::start()
   sleepModeTicker.attach(
       myConfig.get()->displaySleep / 3, +[](Display *instance) { instance->sleepModeDisplay(); }, this);
   displayRefreshTicker.attach_ms(
-      100, +[](Display *instance) { instance->loopDisplay(); }, this);
+      200, +[](Display *instance) { instance->loopDisplay(); }, this);
 
   return true;
 }
@@ -162,7 +163,7 @@ void Display::loopDisplay()
 
     _u8g2.setFont(fontName);
     _u8g2.setCursor(12, 10);
-    _u8g2.printf("%2.1f\xB0\x43", 22.1);
+    _u8g2.printf("%2.1f\xB0\x43", aid.getTemp());
     _u8g2.setCursor(48 + 10, 10);
     _u8g2.printf("%2.0f%ml/s", waterLevel.getActualFlow());
 

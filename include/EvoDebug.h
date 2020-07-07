@@ -50,7 +50,7 @@
     };
 
     #ifdef EVODEBUG_SERIAL 
-        #ifndef log_w
+        #ifndef log_wn
         class SerialEvoAppender: public EvoAppender {
             public:
                 void begin(){
