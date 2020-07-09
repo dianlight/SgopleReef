@@ -6,21 +6,39 @@
 
 	// Set *default* container specific settings.json values on container create.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		"terminal.integrated.shell.linux": "/bin/bash",
+		"platformio-ide.useBuiltinPIOCore": true,
+		"platformio-ide.pioHomeServerHttpPort": 8010
 	},
 
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"dbaeumer.vscode-eslint",
-		"platformio.platformio-ide"
-	]
+		"platformio.platformio-ide",
+		"ms-vscode.cpptools",
+		"donjayamanne.git-extension-pack"
+	],
+	"runArgs": [
+		"--privileged",
+		"--device=/dev/tty.usbserial-1420:/dev/ttyS1"
+	],
+
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+	"forwardPorts": [8010],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "yarn install",
 
 	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "node"
+
+	"mounts": [
+		"source=sgoplereef_vcode,target=/root/.vscode-server/extensions,type=volume",
+		"source=platform_io,target=/root/.platformio,type=volume"
+		// And/or for VS Code Insiders
+//		"source=unique-vol-name-here-insiders,target=/root/.vscode-server-insiders/extensions,type=volume",
+	],
+	"remoteEnv": { "MY_VARIABLE": "some-value" }
+
 }

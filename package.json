@@ -11,7 +11,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start:dev": "webpack-dev-server --mode=development --env.DEFINE_SMT_VERSION=${npm_package_version} --env.DEFINE_SMT_HOST=${npm_package_name} --env.DEFINE_DEBUG_REMOTE=False",
         "compile": "webpack --mode=production --env.DEFINE_SMT_VERSION=${DEFINE_SMT_VERSION:-${npm_package_version}} --env.DEFINE_SMT_HOST=${DEFINE_SMT_HOST:-'SgopleReef' } --env.DEFINE_DEBUG_REMOTE=${DEFINE_DEBUG_REMOTE:-'True'}",
-        "postinstall": "npm run compile",
+        "postinstall": "npm rebuild node-sass && npm run compile",
         "profile": "webpack --profile --json > webpack-stats.json && webpack-bundle-analyzer webpack-stats.json",
         "clean": "rimraf data",
         "cleanall": "rimraf data node_modules"

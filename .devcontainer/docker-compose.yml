@@ -1,0 +1,12 @@
+services:
+  platformio_vscode:
+    volumes:
+      - sgoplereef_vcode:~/.vscode-server/extensions
+      #- platform_io:/root/.platformio
+      # And/or for VS Code Insiders
+#      - unique-vol-name-here-insiders:~/.vscode-server-insiders/extensions
+    # ...
+
+volumes:
+  sgoplereef_vcode:
+#  unique-vol-name-here-insiders:
