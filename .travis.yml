@@ -27,6 +27,8 @@
 language: python
 python:
     - "2.7"
+node_js:
+    - "14"    
 sudo: false
 cache:
     directories:
@@ -34,6 +36,7 @@ cache:
 install:
     - pip install -U platformio
     - platformio update
+    - npm install
 script:
     - platformio run
 deploy:
